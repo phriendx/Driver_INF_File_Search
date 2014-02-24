@@ -1,6 +1,7 @@
 ﻿#========================================================================
 # Date              : 2/16/2014 4:49 PM
 # Author            : Jeff Pollock
+# Website           : http://lifeinpowershell.blogspot.com/
 # 
 # Description       : Assists in identifying driver INF files for import
 #                     into Configuration Manager 2007 & 2012. It does this
@@ -17,7 +18,6 @@ Param (
 
     [parameter(ValueFromPipeline=$True)]
     [switch]$UnknownOnly  #Determines whether to return all devices or just unknown
-
 )
 
 #----------------------------------------------
@@ -62,14 +62,9 @@ Function Search-DeviceINF {
     $Pattern = $Device.DeviceID
     
     #--Evaluate $Pattern for occurance of "&DEV" or "DLL"
-    If ($Pattern.Contains("&DEV")) {        
-        #--Extract the regex matching substring and assign to $Pattern
-        $Pattern -match 'DEV_\w+[^&]' | out-null
-        $PatternModified = $True
-    } ElseIf ($Pattern.Contains("DLL")) {
-        #--Extract the regex matching substring and assign to $Pattern
-        $Pattern -match 'DLL\w+[^\\]' | out-null
-        $PatternModified = $True
+    switch -regex ($Pattern) {
+        "&DEV" {$Pattern -match 'DEV_\w+[^&]' | out-null;$PatternModified = $True}
+        "DLL"  {$Pattern -match 'DLL\w+[^\\]' | out-null;$PatternModified = $True}
     }
 
     #--Search directory for INF files with the occurance of $Pattern
